@@ -4,14 +4,21 @@ from flask_login import login_user,logout_user,current_user,login_required
 from .forms import LoginForm
 from .models import User
 
+@lm.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+@app.before_request
+def before_request():
+    g.user = current_user
+
+
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
     user = g.user
-    user = {
-        'nickname':'Miguel'
-    }
+
     posts = [
         {
             'author': { 'nickname': 'John' },
@@ -24,13 +31,12 @@ def index():
     ]
     return render_template('index.html',title = 'Home',user=user,posts=posts)
 
-@lm.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+
 
 @app.route('/login',methods=['GET','POST'])
 @oid.loginhandler
 def login():
+    print g.user
     if g.user is not None and g.user.is_authenticated():
         return redirect(url_for('index'))
     form = LoginForm()
