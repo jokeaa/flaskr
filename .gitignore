@@ -169,3 +169,5 @@ crashlytics-build.properties
 fabric.properties
 
 .gitignore
+
+/temp

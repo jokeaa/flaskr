@@ -6,7 +6,9 @@ from .models import User
 
 @lm.user_loader
 def load_user(id):
-    return User.query.get(int(id))
+    users = User.query.get(int(id))
+    print users
+    return users
 
 @app.before_request
 def before_request():
@@ -36,22 +38,22 @@ def index():
 @app.route('/login',methods=['GET','POST'])
 @oid.loginhandler
 def login():
-    print g.user
-    if g.user is not None and g.user.is_authenticated():
-        return redirect(url_for('index'))
     form = LoginForm()
+    if g.user is not None and g.user.is_authenticated:
+            return redirect(url_for('index'))
     if form.validate_on_submit():
         session['remember_me'] = form.remember_me.data
-        return oid.try_login(form.openid.data,ask_for=['nickname','email'])
-        # flash('Login requested for OpenID="' + form.openid.data + '", remember_me=' + str(form.remember_me.data))
-        # return redirect('/index')
-    return render_template(
-        'login.html',
-        title = 'Sign In',
-        form = form,
-        providers = app.config['OPENID_PROVIDERS']
-    )
+        if form.login_type.data == 'id_login':
+            return oid.try_login(form.openid.data,ask_for=['nickname','email'])
+        else:
+            pass
 
+    return render_template(
+            'login.html',
+            title = 'Sign In',
+            form = form,
+            providers = app.config['OPENID_PROVIDERS']
+        )
 @oid.after_login
 def after_login(resp):
     if resp.email is None or resp.email == "":
@@ -70,4 +72,9 @@ def after_login(resp):
         remember_me = session['remember_me']
         session.pop('remember_me',None)
     login_user(user,remember=remember_me)
-    return redirect(request.args.get('next') or url_for('index'))
+    return redirect(url_for('index'))
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
