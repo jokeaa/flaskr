@@ -26,4 +26,4 @@ MAIL_PASSWORD = 'jsdhoceovpywbhgg'
 #administrator list
 ADMINS = ['422740565@qq.com']
 
-LOG_TYPE = 'log_file' #or log_file
+LOG_TYPE = 'email' #or log_file
